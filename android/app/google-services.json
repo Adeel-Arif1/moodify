@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "881029220728",
+    "firebase_url": "https://fir-practice-a2908-default-rtdb.firebaseio.com",
+    "project_id": "fir-practice-a2908",
+    "storage_bucket": "fir-practice-a2908.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881029220728:android:4b6598c7925f2caba6a08d",
+        "android_client_info": {
+          "package_name": "com.example.practice_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbNPudmSKEF78czNPPnJzBqrGZfapu4j8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881029220728:android:78911074c797883ea6a08d",
+        "android_client_info": {
+          "package_name": "com.example.zee_palm_task"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbNPudmSKEF78czNPPnJzBqrGZfapu4j8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
