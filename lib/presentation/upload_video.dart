@@ -1,5 +1,6 @@
-// upload_video_page.dart
 import 'package:zee_palm_task/controllers/upload_controler.dart';
+
+import 'package:zee_palm_task/controllers/mood_controller.dart';
 import 'package:zee_palm_task/packages/packages.dart';
 
 class UploadVideoPage extends StatelessWidget {
@@ -8,6 +9,7 @@ class UploadVideoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UploadController controller = Get.put(UploadController());
+    final MoodController moodController = Get.put(MoodController());
     final size = MediaQuery.of(context).size;
     final isWeb = size.width > 800;
 
@@ -38,20 +40,11 @@ class UploadVideoPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Video Selection Card
                   _buildVideoSelectionCard(controller, isWeb),
-
                   const SizedBox(height: 24),
-
-                  // Video Details Form
-                  _buildVideoDetailsForm(controller, isWeb),
-
+                  _buildVideoDetailsForm(controller, moodController, isWeb),
                   const SizedBox(height: 32),
-
-                  // Upload Button
                   Obx(() => _buildUploadButton(controller, isWeb)),
-
-                  // Upload Progress
                   Obx(() => controller.isUploading.value
                       ? _buildUploadProgress(controller, isWeb)
                       : const SizedBox.shrink()),
@@ -216,7 +209,8 @@ class UploadVideoPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVideoDetailsForm(UploadController controller, bool isWeb) {
+  Widget _buildVideoDetailsForm(
+      UploadController controller, MoodController moodController, bool isWeb) {
     return Container(
       padding: EdgeInsets.all(isWeb ? 24 : 20),
       decoration: BoxDecoration(
@@ -241,10 +235,81 @@ class UploadVideoPage extends StatelessWidget {
               color: const Color(0xFF1F2937),
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // Description Field
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Mood',
+                style: GoogleFonts.poppins(
+                  fontSize: isWeb ? 14 : 12,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Obx(() => DropdownButtonFormField<String>(
+                    value: moodController.selectedMood.value == 'All'
+                        ? null
+                        : moodController.selectedMood.value,
+                    hint: Text(
+                      'Select Mood',
+                      style: GoogleFonts.poppins(
+                        fontSize: isWeb ? 16 : 14,
+                        color: const Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    items: moodController.moods
+                        .where((mood) => mood != 'All')
+                        .map((mood) => DropdownMenuItem(
+                              value: mood,
+                              child: Text(
+                                mood,
+                                style: GoogleFonts.poppins(
+                                  fontSize: isWeb ? 16 : 14,
+                                  color: const Color(0xFF1F2937),
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        moodController.setMood(value);
+                      }
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE5E7EB),
+                          width: 1.5,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE5E7EB),
+                          width: 1.5,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF667eea),
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: isWeb ? 18 : 16,
+                      ),
+                    ),
+                  )),
+            ],
+          ),
+          const SizedBox(height: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

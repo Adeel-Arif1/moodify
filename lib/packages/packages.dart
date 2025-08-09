@@ -1,10 +1,8 @@
 export 'package:flutter/material.dart';
-
-// packages
 export 'package:get/get.dart';
 export 'package:firebase_auth/firebase_auth.dart';
-
 export 'package:zee_palm_task/controllers/auth/auth_controller.dart';
+
 export 'package:zee_palm_task/presentation/splash_page/splash_page.dart';
 export 'package:connectivity_plus/connectivity_plus.dart';
 export 'package:zee_palm_task/controllers/splash_controller.dart';

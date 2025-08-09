@@ -95,7 +95,7 @@ class LoginPage extends StatelessWidget {
 
                     // Email Field
                     CustomTextField(
-                      controller: authController.emailAddressController.value,
+                      controller: authController.emailAddressController,
                       label: 'Email Address',
                       hint: 'Enter your email',
                       prefixIcon: Icons.email_outlined,
@@ -115,7 +115,7 @@ class LoginPage extends StatelessWidget {
 
                     // Password Field
                     Obx(() => CustomTextField(
-                          controller: authController.passwordController.value,
+                          controller: authController.passwordController,
                           label: 'Password',
                           hint: 'Enter your password',
                           prefixIcon: Icons.lock_outline,

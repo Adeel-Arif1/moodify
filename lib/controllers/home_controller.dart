@@ -1,10 +1,5 @@
-// Add to pubspec.yaml:
-// video_player: ^2.8.2
-// chewie: ^1.7.5
-
-// home_controller.dart (Updated)
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:zee_palm_task/controllers/mood_controller.dart';
 import 'package:zee_palm_task/models/video_model.dart';
 import 'package:zee_palm_task/packages/packages.dart';
 import 'package:zee_palm_task/presentation/upload_video.dart';
@@ -16,6 +11,7 @@ class HomeController extends GetxController {
   RxString errorMessage = ''.obs;
 
   final AuthController authController = Get.find<AuthController>();
+  final MoodController moodController = Get.find<MoodController>();
 
   @override
   void onInit() {
@@ -29,10 +25,16 @@ class HomeController extends GetxController {
       isLoading.value = true;
       hasError.value = false;
 
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      Query<Map<String, dynamic>> query = FirebaseFirestore.instance
           .collection('zee_palm_videos')
-          .orderBy('uploadedAt', descending: true)
-          .get();
+          .orderBy('uploadedAt', descending: true);
+
+      // Filter by mood if not 'All'
+      if (moodController.selectedMood.value != 'All') {
+        query = query.where('mood', isEqualTo: moodController.selectedMood.value);
+      }
+
+      QuerySnapshot querySnapshot = await query.get();
 
       List<VideoModel> fetchedVideos = querySnapshot.docs
           .map((doc) => VideoModel.fromFirestore(doc))
@@ -58,20 +60,17 @@ class HomeController extends GetxController {
           FirebaseFirestore.instance.collection('zee_palm_videos').doc(videoId);
 
       if (isLiked) {
-        // Remove like
         await videoDoc.update({
           'likes': FieldValue.increment(-1),
           'likedBy': FieldValue.arrayRemove([currentUser.uid]),
         });
       } else {
-        // Add like
         await videoDoc.update({
           'likes': FieldValue.increment(1),
           'likedBy': FieldValue.arrayUnion([currentUser.uid]),
         });
       }
 
-      // Update local video data
       final videoIndex = videos.indexWhere((v) => v.id == videoId);
       if (videoIndex != -1) {
         final video = videos[videoIndex];
@@ -82,6 +81,7 @@ class HomeController extends GetxController {
           thumbnailUrl: video.thumbnailUrl,
           uploaderName: video.uploaderName,
           uploaderEmail: video.uploaderEmail,
+          mood: video.mood,
           uploadedAt: video.uploadedAt,
           views: video.views,
           likes: isLiked ? video.likes - 1 : video.likes + 1,

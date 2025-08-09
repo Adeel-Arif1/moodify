@@ -1,26 +1,23 @@
-// upload_controller.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:zee_palm_task/controllers/mood_controller.dart';
 import 'package:zee_palm_task/packages/packages.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class UploadController extends GetxController {
   Rx<TextEditingController> captionController = TextEditingController().obs;
-
-  // Upload state
   RxBool isUploading = false.obs;
   RxDouble uploadProgress = 0.0.obs;
   RxString uploadStatus = ''.obs;
-
-  // Selected video
   Rx<File?> selectedVideo = Rx<File?>(null);
   RxString selectedVideoName = ''.obs;
   RxString selectedVideoSize = ''.obs;
 
   final AuthController authController = Get.find<AuthController>();
+  final MoodController moodController = Get.find<MoodController>();
 
-  /// Pick video file
+  /// Pick video file from device
   Future<void> pickVideo() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -40,6 +37,14 @@ class UploadController extends GetxController {
           backgroundColor: const Color(0xFF10B981),
           colorText: Colors.white,
         );
+      } else {
+        Get.snackbar(
+          'Info',
+          'No video selected',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF6B7280),
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar(
@@ -52,7 +57,7 @@ class UploadController extends GetxController {
     }
   }
 
-  /// Upload video to Firebase
+  /// Upload video to Firebase Storage and save metadata to Firestore
   Future<void> uploadVideo() async {
     if (!_validateForm()) return;
 
@@ -61,13 +66,11 @@ class UploadController extends GetxController {
       uploadProgress.value = 0.0;
       uploadStatus.value = 'Preparing upload...';
 
-      // Get current user
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         throw Exception('User not authenticated');
       }
 
-      // Create unique filename
       final fileName =
           '${DateTime.now().millisecondsSinceEpoch}_${selectedVideoName.value}';
       final storageRef =
@@ -75,25 +78,20 @@ class UploadController extends GetxController {
 
       uploadStatus.value = 'Uploading video...';
 
-      // Upload file
       final uploadTask = storageRef.putFile(selectedVideo.value!);
 
-      // Listen to upload progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         uploadProgress.value = snapshot.bytesTransferred / snapshot.totalBytes;
       });
 
-      // Wait for upload completion
       await uploadTask;
 
       uploadStatus.value = 'Getting download URL...';
 
-      // Get download URL
       final downloadURL = await storageRef.getDownloadURL();
 
       uploadStatus.value = 'Saving video data...';
 
-      // Get user data
       final userDoc = await FirebaseFirestore.instance
           .collection('zee_palm_users')
           .doc(currentUser.uid)
@@ -102,18 +100,22 @@ class UploadController extends GetxController {
       final userData = userDoc.data();
       final userName = userData?['name'] ?? 'Unknown User';
 
-      // Save video data to Firestore
       await FirebaseFirestore.instance.collection('zee_palm_videos').add({
         'caption': captionController.value.text.trim(),
         'videoUrl': downloadURL,
+        'thumbnailUrl': '', // Placeholder: Update with actual thumbnail URL if available
         'uploaderName': userName,
         'uploaderEmail': currentUser.email,
         'uploaderId': currentUser.uid,
+        'mood': moodController.selectedMood.value == 'All'
+            ? 'General'
+            : moodController.selectedMood.value,
         'uploadedAt': FieldValue.serverTimestamp(),
         'views': 0,
         'likes': 0,
         'fileName': fileName,
         'fileSize': selectedVideo.value!.lengthSync(),
+        'likedBy': [],
       });
 
       uploadStatus.value = 'Upload completed!';
@@ -128,7 +130,6 @@ class UploadController extends GetxController {
         duration: const Duration(seconds: 3),
       );
 
-      // Clear form and navigate back
       _clearForm();
       Get.back();
     } catch (e) {
@@ -146,7 +147,7 @@ class UploadController extends GetxController {
     }
   }
 
-  /// Validate form
+  /// Validate form inputs before uploading
   bool _validateForm() {
     if (selectedVideo.value == null) {
       Get.snackbar(
@@ -160,17 +161,31 @@ class UploadController extends GetxController {
     }
 
     if (captionController.value.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter a caption',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFEF4444),
-          colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Please enter a caption',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    if (moodController.selectedMood.value == 'All') {
+      Get.snackbar(
+        'Error',
+        'Please select a mood',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+      );
       return false;
     }
 
     return true;
   }
 
-  /// Clear form
+  /// Clear form fields after successful upload
   void _clearForm() {
     captionController.value.clear();
     selectedVideo.value = null;
@@ -178,9 +193,10 @@ class UploadController extends GetxController {
     selectedVideoSize.value = '';
     uploadProgress.value = 0.0;
     uploadStatus.value = '';
+    moodController.setMood('All');
   }
 
-  /// Format file size
+  /// Format file size for display
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
