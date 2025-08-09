@@ -6,6 +6,7 @@ import 'package:zee_palm_task/controllers/mood_controller.dart';
 import 'package:zee_palm_task/controllers/home_controller.dart';
 import 'package:zee_palm_task/presentation/home_page/home_page.dart';
 import 'package:zee_palm_task/presentation/home_page/profile_page.dart';
+import 'package:zee_palm_task/presentation/splash_page/intro_page.dart';
 
 import 'package:zee_palm_task/presentation/upload_video.dart';
 
@@ -14,6 +15,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+    Get.put(AuthController()); 
   runApp(const MyApp());
 }
 
@@ -51,9 +53,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/splash',
+      initialRoute: '/splash',//IntroPage
       getPages: [
         GetPage(name: '/splash', page: () => const SplashPage()),
+        GetPage(name: '/intro', page: () => const IntroPage()),
         GetPage(name: '/home', page: () => const HomePage()),
         GetPage(name: '/upload', page: () => const UploadVideoPage()),
         GetPage(name: '/profile', page: () => const ProfilePage()),
