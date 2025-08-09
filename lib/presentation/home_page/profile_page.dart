@@ -52,7 +52,7 @@ class ProfilePage extends StatelessWidget {
         } else {
           lastDocument = snapshot.docs.last;
           final newVideos = snapshot.docs
-              .map((doc) => VideoModel.fromJson(doc.id, doc.data()))
+              .map((doc) => VideoModel.fromFirestore(doc))
               .toList();
           userVideos.addAll(newVideos);
           hasMore.value = snapshot.docs.length == pageSize;
@@ -154,7 +154,7 @@ class ProfilePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2), // Updated from withOpacity
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -295,11 +295,11 @@ class ProfilePage extends StatelessWidget {
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                         decoration: BoxDecoration(
-                                          color: _getMoodColor(mood).withOpacity(0.9),
+                                          color: _getMoodColor(mood).withValues(alpha: 0.9), // Updated from withOpacity
                                           borderRadius: BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: _getMoodColor(mood).withOpacity(0.3),
+                                              color: _getMoodColor(mood).withValues(alpha: 0.3), // Updated from withOpacity
                                               blurRadius: 8,
                                               spreadRadius: 1,
                                             ),
@@ -400,7 +400,7 @@ class ProfilePage extends StatelessWidget {
                                 child: TikTokVideoCard(
                                   video: video,
                                   isWeb: isWeb,
-                                  onLikeToggle: homeController.toggleLike,
+                                  onLikeToggle: (videoId, isLiked) => homeController.toggleLike(videoId),
                                 ),
                               );
                             },

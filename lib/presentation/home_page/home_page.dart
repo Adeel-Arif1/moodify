@@ -3,6 +3,7 @@ import 'package:zee_palm_task/controllers/home_controller.dart';
 import 'package:zee_palm_task/controllers/mood_controller.dart';
 import 'package:zee_palm_task/models/video_model.dart';
 import 'package:zee_palm_task/packages/packages.dart';
+import 'package:zee_palm_task/presentation/home_page/profile_page.dart';
 import 'package:zee_palm_task/widgets/video_card.dart';
 
 class HomePage extends StatelessWidget {
@@ -44,13 +45,15 @@ class HomePage extends StatelessWidget {
         children: [
           // Mood Selection Chips
           Container(
-            padding: EdgeInsets.symmetric(horizontal: isWeb ? 16 : 12, vertical: 8),
+            padding:
+                EdgeInsets.symmetric(horizontal: isWeb ? 16 : 12, vertical: 8),
             color: const Color(0xFF111827), // Darker chip background
             child: Obx(() => SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: moodController.moods.map((mood) {
-                      bool isSelected = moodController.selectedMood.value == mood;
+                      bool isSelected =
+                          moodController.selectedMood.value == mood;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ChoiceChip(
@@ -58,11 +61,14 @@ class HomePage extends StatelessWidget {
                             mood,
                             style: GoogleFonts.poppins(
                               fontSize: isWeb ? 14 : 12,
-                              color: isSelected ? Colors.white : const Color(0xFFD1D5DB),
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFFD1D5DB),
                             ),
                           ),
                           selected: isSelected,
-                          selectedColor: const Color(0xFF6366F1), // Indigo for selected
+                          selectedColor:
+                              const Color(0xFF6366F1), // Indigo for selected
                           backgroundColor: const Color(0xFF374151), // Dark gray
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -192,10 +198,7 @@ class HomePage extends StatelessWidget {
                   icon: Icons.person,
                   title: 'Profile',
                   onTap: () {
-                    Get.snackbar('Profile', 'Profile page coming soon!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFFA78BFA),
-                        colorText: Colors.white);
+                    Get.to(() => ProfilePage()); // ✅ Navigate to ProfilePage
                   },
                   isWeb: isWeb,
                 ),
@@ -232,7 +235,8 @@ class HomePage extends StatelessWidget {
       child: ListTile(
         leading: Icon(
           icon,
-          color: isDestructive ? const Color(0xFFF87171) : const Color(0xFFD1D5DB),
+          color:
+              isDestructive ? const Color(0xFFF87171) : const Color(0xFFD1D5DB),
           size: isWeb ? 24 : 22,
         ),
         title: Text(
@@ -298,7 +302,8 @@ class HomePage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6366F1), // Indigo button
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -364,7 +369,8 @@ class HomePage extends StatelessWidget {
             child: TikTokVideoCard(
               video: video,
               isWeb: isWeb,
-              onLikeToggle: controller.toggleLike,
+              onLikeToggle: (String videoId, bool isLiked) =>
+                  controller.toggleLike(videoId),
             ),
           );
         },
